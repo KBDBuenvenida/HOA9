@@ -3,7 +3,9 @@ Description=Prometheus Service
 After=network.target
 
 [Service]
-Type=Simple
+User=root
+Group=root
+Type=simple
 ExecStart=/usr/local/bin/prometheus/prometheus \
 --config.file=/etc/prometheus/prometheus.yml
 
