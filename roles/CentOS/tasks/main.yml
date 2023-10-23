@@ -1,0 +1,18 @@
+---
+- name: Install Package for Prometheus (CentOS)
+  yum_repository:
+    name: "prometheus"
+    description: "Prometheus RPM repository"
+    baseurl: https://packagecloud.io/prometheus-rpm/release/e1/7/$basearch
+    gpgcheck: yes
+    enabled: yes
+
+- name: Import Prometheus GPG key if not installed (CentOS)
+  command: rpm --import https://packagecloud.io/prometheus-rpm/release/gpgkey
+  args:
+    creates: /etc/pki/rpm-gpg/RPM-GPG-KEY-Packagecloud-Prometheus
+  when: ansible_distribution_major_version == "7"
+
+- name: Install Prometheus (CentOS)
+  command: dnf install -y --nogpgcheck prometheus
+  when: ansible_distribution_major_version == "7"

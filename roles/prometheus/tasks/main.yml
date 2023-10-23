@@ -1,0 +1,60 @@
+---
+- name: Install Package for Prometheus (Ubuntu)
+  apt:
+    name:
+      - nginx
+      - wget
+      - python3-jmespath
+    state: latest
+  ansible_distribution: "Ubuntu"
+
+- name: Install Package for Prometheus (CentOS)
+  yum_repository:
+    name: "prometheus"
+    description: "Prometheus RPM repository"
+    baseurl: https://packagecloud.io/prometheus-rpm/release/e1/7/$basearch
+    gpgcheck: yes
+    enabled: yes
+
+- name: Import Prometheus GPG key if not installed (CentOS)
+  command: rpm --import https://packagecloud.io/prometheus-rpm/release/gpgkey
+  args:
+    creates: /etc/pki/rpm-gpg/RPM-GPG-KEY-Packagecloud-Prometheus
+  when: ansible_distribution_major_version == "7"
+
+- name: Install Prometheus (CentOS)
+  command: dnf install -y --nogpgcheck prometheus
+  when: ansible_distribution_major_version == "7"
+
+- name: Directory for extraction of Prometheus
+  file:
+    path: ~/prometheus
+    state: directory
+
+- name: Download Prometheus (Ubuntu)
+  unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz
+    dest: ~/prometheus
+    remote_src: yes
+    mode: 0777
+    owner: root
+    group: root
+
+- name: Executable for Prometheus
+  shell: |
+    cd ~/prometheus/prometheus*
+    cp -r . /usr/local/bin/prometheus
+
+- name: Import additional files for Prometheus
+  copy:
+    src: prometheus.service
+    dest: /etc/systemd/system
+    mode: 777
+    owner: root
+    group: root
+
+- name: Verification of Prometheus if installed
+  service:
+    name: prometheus
+    state: restarted
+    enabled: true

@@ -1,0 +1,13 @@
+---
+- hosts: Ubuntu
+  become: true
+  tasks:
+  roles:
+    - Ubuntu
+
+- hosts: CentOS
+  become: true
+  tasks: 
+  roles:
+    - CentOS
+
